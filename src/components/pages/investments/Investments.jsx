@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { initializeDatabase, addData, fetchData } from '../../../server.js';
 import './Investments.css';
 import InvestmentsForm from './InvestmentsForm.jsx';
+import jsPDF from 'jspdf'; 
 
 function Investments() {
   const [investments, setInvestments] = useState([]);
@@ -58,6 +59,87 @@ function Investments() {
     setupDatabase();
   }, []);
 
+  const downloadCSV = () => {
+    const headers = [
+      'Financial Organization',
+      'Name of Financial Institution',
+      'Branch Address',
+      'Type of Investment',
+      'Investment Number',
+      'Investment Holder',
+      'Nominee',
+      'Nominee Guardian',
+      'Investment Amount',
+      'Rate of Investment',
+      'Investment Date',
+      'Investment Duration',
+      'Maturity Date',
+      'Maturity Amount',
+    ];
+
+    const rows = investments.map((investment) =>
+      [
+        investment.financialOrganization,
+        investment.financialInstitution,
+        investment.branchAddress,
+        investment.typeOfInvestment,
+        investment.investmentNumber,
+        investment.investmentHolder,
+        investment.nominee,
+        investment.nomineeGuardian,
+        investment.investmentAmount,
+        investment.rateOfInvestment,
+        investment.investmentDate,
+        investment.investmentDuration,
+        investment.maturityDate,
+        investment.maturityAmount,
+      ].join(',')
+    );
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'investments.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    let y = 10; // Vertical position in the PDF
+
+    doc.setFontSize(12);
+    doc.text('Investments Table', 10, y);
+    y += 10;
+
+    // table headers
+    doc.text(
+      'Financial Organization | Name of Financial Institution | Branch Address | Type of Investment | Investment Number | Investment Holder | Nominee | Nominee Guardian | Investment Amount | Rate of Investment | Investment Date | Investment Duration | Maturity Date | Maturity Amount',
+      10,
+      y,
+      { maxWidth: 190 }
+    );
+    y += 10;
+
+    // table rows
+    investments.forEach((investment, index) => {
+      const data = `${index + 1}. ${investment.financialOrganization}, ${investment.financialInstitution}, ${investment.branchAddress}, ${investment.typeOfInvestment}, ${investment.investmentNumber}, ${investment.investmentHolder}, ${investment.nominee}, ${investment.nomineeGuardian}, ${investment.investmentAmount}, ${investment.rateOfInvestment}, ${investment.investmentDate}, ${investment.investmentDuration}, ${investment.maturityDate}, ${investment.maturityAmount}`;
+      doc.text(data, 10, y, { maxWidth: 190 });
+      y += 10;
+
+      if (y > 280) {
+        doc.addPage();
+        y = 10;
+      }
+    });
+
+    doc.save('investments.pdf');
+  };
+
   return (
     <div>
       <table className="table">
@@ -102,8 +184,8 @@ function Investments() {
       </table>
       <div className="buttonCluster">
         <button onClick={() => setShowForm(true)}>Add More</button>
-        <button>Download as CSV</button>
-        <button>Download as PDF</button>
+        <button onClick={downloadCSV}>Download as CSV</button>
+        <button onClick={downloadPDF}>Download as PDF</button>
       </div>
 
       {showForm && <InvestmentsForm closeForm={() => setShowForm(false)} />}

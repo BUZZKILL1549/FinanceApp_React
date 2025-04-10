@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { initializeDatabase, addData, fetchData } from '../../../server.js';
 import './Insurance.css';
 import InsuranceForm from './InsuranceForm.jsx';
+import jsPDF from 'jspdf'; 
 
 function Insurance() {
   const [insurance, setInsurance] = useState([]);
@@ -56,6 +57,85 @@ function Insurance() {
     setupDatabase();
   }, []);
 
+  const downloadCSV = () => {
+    const headers = [
+      'Insurance Provider',
+      'Policy Number',
+      'Policy Name',
+      'Policy Holder',
+      'Life Insured',
+      'Sum Assured',
+      'Nominee',
+      'Policy Payment Term',
+      'Premium Payment Frequency',
+      'Last Premium Paid',
+      'Next Premium Due',
+      'Maturity Date',
+      'Maturity Amount',
+    ];
+
+    const rows = insurance.map((policy) =>
+      [
+        policy.provider,
+        policy.policyNumber,
+        policy.policyName,
+        policy.policyHolder,
+        policy.lifeInsured,
+        policy.sumAssured,
+        policy.nominee,
+        policy.paymentTerm,
+        policy.paymentFrequency,
+        policy.lastPremiumPaid,
+        policy.nextPremiumDue,
+        policy.maturityDate,
+        policy.maturityAmount,
+      ].join(',')
+    );
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'insurance.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    let y = 10; // Vertical position in the PDF
+
+    doc.setFontSize(12);
+    doc.text('Insurance Table', 10, y);
+    y += 10;
+
+    // table headers
+    doc.text(
+      'Insurance Provider | Policy Number | Policy Name | Policy Holder | Life Insured | Sum Assured | Nominee | Policy Payment Term | Premium Payment Frequency | Last Premium Paid | Next Premium Due | Maturity Date | Maturity Amount',
+      10,
+      y,
+      { maxWidth: 190 }
+    );
+    y += 10;
+
+    // table rows
+    insurance.forEach((policy, index) => {
+      const data = `${index + 1}. ${policy.provider}, ${policy.policyNumber}, ${policy.policyName}, ${policy.policyHolder}, ${policy.lifeInsured}, ${policy.sumAssured}, ${policy.nominee}, ${policy.paymentTerm}, ${policy.paymentFrequency}, ${policy.lastPremiumPaid}, ${policy.nextPremiumDue}, ${policy.maturityDate}, ${policy.maturityAmount}`;
+      doc.text(data, 10, y, { maxWidth: 190 });
+      y += 10;
+
+      if (y > 280) {
+        doc.addPage();
+        y = 10;
+      }
+    });
+
+    doc.save('insurance.pdf');
+  };
+
   return (
     <div>
       <table className="table">
@@ -98,8 +178,8 @@ function Insurance() {
       </table>
       <div className="buttonCluster">
         <button onClick={() => setShowForm(true)}>Add More</button>
-        <button>Download as CSV</button>
-        <button>Download as PDF</button>
+        <button onClick={downloadCSV}>Download as CSV</button>
+        <button onClick={downloadPDF}>Download as PDF</button>
       </div>
 
       {showForm && <InsuranceForm closeForm={() => setShowForm(false)} />}
