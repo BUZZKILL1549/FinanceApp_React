@@ -1,0 +1,50 @@
+.table: {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 10px;
+  text-align: left;
+  background-color: #e0e0e0;
+  font-family: 'sans-serif';
+}
+
+.table tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.table td {
+  padding: 10px;
+  text-align: left;
+  font-family: 'sans-serif';
+}
+
+.buttonCluster {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.buttonCluster button {
+  padding: 10px 20px;
+  font-size: 10px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  font-family: 'sans-serif';
+}
+
+.buttonCluster button:hover {
+  background-color: #999;
+}
+
+.buttonCluster button:active {
+  background-color: #777;
+}
