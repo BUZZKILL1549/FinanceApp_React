@@ -1,97 +1,96 @@
 import React, { useState } from 'react';
-import './InsuranceForm.css';
+import './Investments.css';
 
-function InsuranceForm({ closeForm }) {
+function InvestmentsForm({ closeForm }) {
   const [formData, setFormData] = useState({
-    insuranceProvider: '',
-    policyNumber: '',
-    policyName: '',
-    policyHolder: '',
-    lifeInsured: '',
-    sumAssured: '',
+    financialOrganization: '',
+    nameOfFinancialInstitution: '',
+    branchAddress: '',
+    typeOfInvestment: '',
+    investmentNumber: '',
+    investmentHolder: '',
     nominee: '',
-    policyPaymentTerm: '',
-    premiumPaymentFrequency: '',
-    lastPremiumPaid: '',
-    nextPremiumDue: '',
+    nomineeGuardian: '',
+    investmentAmount: '',
+    rateOfInterest: '',
+    investmentDate: '',
+    investmentDuration: '',
     maturityDate: '',
     maturityAmount: '',
   });
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    closeForm(); // Close the popup after submission
+    console.log('Form submitted: ', formData);
+    closeForm();
   };
 
   return (
     <div className="popup-overlay">
       <div className="popup-form">
-        <h2>Add Insurance</h2>
+        <h2>Add Investment</h2>
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Insurance Provider: </label>
+            <label>Financial Organization</label>
             <input
               type="text"
-              name="insuranceProvider"
-              value={formData.insuranceProvider}
+              name="financialOrganization"
+              value={formData.financialOrganization}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Policy Number: </label>
+            <label>Name of Financial Institution: </label>
             <input
               type="text"
-              name="policyNumber"
-              value={formData.policyNumber}
+              name="nameOfFinancialInstitution"
+              value={formData.nameOfFinancialInstitution}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Policy Name: </label>
+            <label>Branch Address: </label>
             <input
               type="text"
-              name="policyName"
-              value={formData.policyName}
+              name="branchAddress"
+              value={formData.branchAddress}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Policy Holder: </label>
+            <label>Type of Investment: </label>
             <input
               type="text"
-              name="policyHolder"
-              value={formData.policyHolder}
+              name="typeOfInvestment"
+              value={formData.typeOfInvestment}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Life Insured: </label>
+            <label>Investment Number: </label>
             <input
               type="text"
-              name="lifeInsured"
-              value={formData.lifeInsured}
+              name="investmentNumber"
+              value={formData.investmentNumber}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Sum Assured: </label>
+            <label>Investment Holder: </label>
             <input
               type="text"
-              name="sumAssured"
-              value={formData.sumAssured}
+              name="investmentHolder"
+              value={formData.investmentHolder}
               onChange={handleChange}
               required
             />
@@ -107,41 +106,51 @@ function InsuranceForm({ closeForm }) {
             />
           </div>
           <div>
-            <label>Policy Payment Term: </label>
-            <input 
-              type="text"
-              name="policyPaymentTerm"
-              value={formData.policyPaymentTerm}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Premium Payment Frequency: </label>
-            <input 
-              type="text"
-              name="premiumPaymentFrequency"
-              value={formData.premiumPaymentFrequency}
-              onChange={handleChange}
-              required 
-            />
-          </div>
-          <div>
-            <label>Last Premium Paid: </label>
+            <label>Nominee Guardian: </label>
             <input
               type="text"
-              name="lastPremiumPaid"
-              value={formData.lastPremiumPaid}
+              name="nomineeGuardian"
+              value={formData.nomineeGuardian}
               onChange={handleChange}
               required
             />
           </div>
           <div>
-            <label>Next Premium Due: </label>
-            <input 
+            <label>Investment Amount: </label>
+            <input
               type="text"
-              name="nextPremiumDue"
-              value={formData.nextPremiumDue}
+              name="investmentAmount"
+              value={formData.investmentAmount}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Rate of Interest: </label>
+            <input
+              type="text"
+              name="rateOfInterest"
+              value={formData.rateOfInterest}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Investment Date: </label>
+            <input
+              type="text"
+              name="investmentDate"
+              value={formData.investmentDate}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Investment Duration: </label>
+            <input
+              type="text"
+              name="investmentDuration"
+              value={formData.investmentDuration}
               onChange={handleChange}
               required
             />
@@ -161,7 +170,7 @@ function InsuranceForm({ closeForm }) {
             <input
               type="text"
               name="maturityAmount"
-              value={formData.maturityAmount}
+              values={formData.maturityAmount}
               onChange={handleChange}
               required
             />
@@ -176,4 +185,4 @@ function InsuranceForm({ closeForm }) {
   );
 }
 
-export default InsuranceForm;
+export default InvestmentsForm;

@@ -42,7 +42,7 @@
 }
 
 .buttonCluster button:hover {
-  background-color: #999;
+  opacity: 0.8;
 }
 
 .buttonCluster button:active {

@@ -20,6 +20,21 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: left;
   z-index: 1000;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.popup-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.popup-form::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.popup-form::-webkit-scrollbar-thumb:hover {
+  background-color: #aaa;
 }
 
 .popup-form h2 {

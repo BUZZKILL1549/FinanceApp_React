@@ -1,92 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { initializeDatabase, addData, fetchData } from '../../../server.js';
 import './Investments.css';
+import InvestmentsForm from './InvestmentsForm.jsx';
 
 function Investments() {
-  const investmentsData = [
-    {
-      financialOrganization: 'ABC Financials',
-      financialInstitution: 'ABC Bank',
-      branchAddress: '123 Main St, Springfield',
-      typeOfInvestment: 'Fixed Deposit',
-      investmentNumber: 'FD123456',
-      investmentHolder: 'John Doe',
-      nominee: 'Jane Doe',
-      nomineeGuardian: 'N/A',
-      investmentAmount: '$10,000',
-      rateOfInvestment: '5%',
-      investmentDate: '2025-01-01',
-      investmentDuration: '5 years',
-      maturityDate: '2030-01-01',
-      maturityAmount: '$12,762',
-    },
-    {
-      financialOrganization: 'XYZ Financials',
-      financialInstitution: 'XYZ Bank',
-      branchAddress: '456 Elm St, Metropolis',
-      typeOfInvestment: 'Mutual Fund',
-      investmentNumber: 'MF789012',
-      investmentHolder: 'Mary Smith',
-      nominee: 'John Smith',
-      nomineeGuardian: 'N/A',
-      investmentAmount: '$20,000',
-      rateOfInvestment: '8%',
-      investmentDate: '2024-06-15',
-      investmentDuration: '10 years',
-      maturityDate: '2034-06-15',
-      maturityAmount: '$43,178',
-    },
-    {
-      financialOrganization: 'PQR Investments',
-      financialInstitution: 'PQR Finance Ltd.',
-      branchAddress: '789 Oak St, Gotham',
-      typeOfInvestment: 'Recurring Deposit',
-      investmentNumber: 'RD345678',
-      investmentHolder: 'Alice Johnson',
-      nominee: 'Tom Johnson',
-      nomineeGuardian: 'N/A',
-      investmentAmount: '$5,000',
-      rateOfInvestment: '6%',
-      investmentDate: '2023-03-01',
-      investmentDuration: '3 years',
-      maturityDate: '2026-03-01',
-      maturityAmount: '$5,955',
-    },
-    {
-      financialOrganization: 'LMN Financials',
-      financialInstitution: 'LMN Credit Union',
-      branchAddress: '321 Pine St, Star City',
-      typeOfInvestment: 'Stock Market',
-      investmentNumber: 'SM567890',
-      investmentHolder: 'Robert Brown',
-      nominee: 'Emily Brown',
-      nomineeGuardian: 'N/A',
-      investmentAmount: '$15,000',
-      rateOfInvestment: '15%',
-      investmentDate: '2021-11-01',
-      investmentDuration: '7 years',
-      maturityDate: '2028-11-01',
-      maturityAmount: '$37,177',
-    },
-    {
-      financialOrganization: 'EFG Capital',
-      financialInstitution: 'EFG Wealth Management',
-      branchAddress: '654 Cedar St, Central City',
-      typeOfInvestment: 'Bond',
-      investmentNumber: 'BO901234',
-      investmentHolder: 'Chris Green',
-      nominee: 'Laura Green',
-      nomineeGuardian: 'N/A',
-      investmentAmount: '$50,000',
-      rateOfInvestment: '4%',
-      investmentDate: '2020-09-01',
-      investmentDuration: '10 years',
-      maturityDate: '2030-09-01',
-      maturityAmount: '$60,744',
-    },
-  ];
+  const [investments, setInvestments] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    const setupDatabase = async () => {
+      try {
+        const db = await initializeDatabase();
+
+        const investmentsData = await fetchData(db, 'investments');
+        if (investmentsData.length === 0) {
+          await addData(db, 'investments', {
+            financialOrganization: 'ABC Financials',
+            financialInstitution: 'ABC Bank',
+            branchAddress: '123 Main St, Springfield',
+            typeOfInvestment: 'Fixed Deposit',
+            investmentNumber: 'FD123456',
+            investmentHolder: 'John Doe',
+            nominee: 'Jane Doe',
+            nomineeGuardian: 'N/A',
+            investmentAmount: '$10,000',
+            rateOfInvestment: '5%',
+            investmentDate: '2025-01-01',
+            investmentDuration: '5 years',
+            maturityDate: '2030-01-01',
+            maturityAmount: '$12,762',
+          });
+
+          await addData(db, 'investments', {
+            financialOrganization: 'XYZ Financials',
+            financialInstitution: 'XYZ Bank',
+            branchAddress: '456 Elm St, Metropolis',
+            typeOfInvestment: 'Mutual Fund',
+            investmentNumber: 'MF789012',
+            investmentHolder: 'Mary Smith',
+            nominee: 'John Smith',
+            nomineeGuardian: 'N/A',
+            investmentAmount: '$20,000',
+            rateOfInvestment: '8%',
+            investmentDate: '2024-06-15',
+            investmentDuration: '10 years',
+            maturityDate: '2034-06-15',
+            maturityAmount: '$43,178',
+          });
+        }
+
+        setInvestments(await fetchData(db, 'investments'));
+      } catch (error) {
+        console.error('Error setting up the database:', error);
+      }
+    };
+
+    setupDatabase();
+  }, []);
 
   return (
-    <>
+    <div>
       <table className="table">
         <thead>
           <tr>
@@ -107,8 +80,8 @@ function Investments() {
           </tr>
         </thead>
         <tbody>
-          {investmentsData.map((investment, index) => (
-            <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
+          {investments.map((investment, index) => (
+            <tr key={index}>
               <td>{investment.financialOrganization}</td>
               <td>{investment.financialInstitution}</td>
               <td>{investment.branchAddress}</td>
@@ -128,11 +101,13 @@ function Investments() {
         </tbody>
       </table>
       <div className="buttonCluster">
-        <button>Add More</button>
+        <button onClick={() => setShowForm(true)}>Add More</button>
         <button>Download as CSV</button>
         <button>Download as PDF</button>
       </div>
-    </>
+
+      {showForm && <InvestmentsForm closeForm={() => setShowForm(false)} />}
+    </div>
   );
 }
 
