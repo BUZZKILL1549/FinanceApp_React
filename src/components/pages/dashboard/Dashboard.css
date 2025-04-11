@@ -1,0 +1,37 @@
+.tables {
+  font-family: 'sans-serif';
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 10px;
+  text-align: left;
+  background-color: #e0e0e0;
+  font-family: 'sans-serif';
+  border-right: 2px solid white;
+}
+
+.table tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.table td {
+  padding: 10px;
+  text-align: left;
+  font-family: 'sans-serif';
+  border-rigth: 2px solid white;
+}
+
+.table th:last-child,
+.table td:last-child {
+  border-right: none;
+}
+
+.table tr {
+  border-bottom: 1px solid #ddd;
+}
+
