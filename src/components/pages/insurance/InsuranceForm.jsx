@@ -105,13 +105,12 @@ function InsuranceForm({ closeForm, addInsurance }) {
             />
           </div>
           <div>
-            <label>Policy Payment Term: </label>
+            <label>Policy Payment Term (in years): </label>
             <input 
               type="number"
               name="policyPaymentTerm"
               value={formData.policyPaymentTerm}
               onChange={handleChange}
-              placeholder="2 years"
               required
             />
           </div>
@@ -122,7 +121,7 @@ function InsuranceForm({ closeForm, addInsurance }) {
               name="premiumPaymentFrequency"
               value={formData.premiumPaymentFrequency}
               onChange={handleChange}
-              placeholder="1 year"
+              placeholder="Annual/Bi-annual/Semi-annual"
               required 
             />
           </div>

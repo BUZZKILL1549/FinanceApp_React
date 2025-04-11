@@ -86,6 +86,18 @@ function Insurance() {
   };
 
   const downloadCSV = () => {
+    const getDateTime = () => {
+      const now = new Date();
+      
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}_${month}_${day}-${hours}_${minutes}`;
+    };
+
     const headers = [
       'Insurance Provider',
       'Policy Number',
@@ -126,13 +138,26 @@ function Insurance() {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'insurance.csv';
+    const filename = 'insurance_' + getDateTime() + '.csv';
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const downloadPDF = () => {
+    const getDateTime = () => {
+      const now = new Date();
+      
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}_${month}_${day}-${hours}_${minutes}`;
+    };
+
     const doc = new jsPDF();
     let y = 10; 
 
@@ -158,8 +183,9 @@ function Insurance() {
         y = 10;
       }
     });
-
-    doc.save('insurance.pdf');
+    
+    const filename = 'insurance_' + getDateTime() + '.pdf';
+    doc.save(filename);
   };
 
   if (loading) {

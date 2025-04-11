@@ -57,6 +57,18 @@ function Investments() {
   }, [db, showForm, refreshTrigger]);
 
   const downloadCSV = () => {
+    const getDateTime = () => {
+      const now = new Date();
+      
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}_${month}_${day}-${hours}_${minutes}`;
+    };
+
     const headers = [
       'Financial Organization',
       'Name of Financial Institution',
@@ -99,13 +111,26 @@ function Investments() {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'investments.csv';
+    const filename = 'investments_' + getDateTime() + '.csv';
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const downloadPDF = () => {
+    const getDateTime = () => {
+      const now = new Date();
+      
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}_${month}_${day}-${hours}_${minutes}`;
+    };
+
     const doc = new jsPDF();
     let y = 10; 
 
@@ -126,8 +151,9 @@ function Investments() {
         y = 10;
       }
     });
-
-    doc.save('investments.pdf');
+    
+    const filename = 'investments_' + getDateTime() + '.pdf';
+    doc.save(filename);
   };
 
   return (
