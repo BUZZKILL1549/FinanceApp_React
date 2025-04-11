@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { initializeDatabase, addData, fetchData } from '../../../server.js';
+import { initializeDatabase, fetchData } from '../../../server.js'; 
 import './Investments.css';
 import InvestmentsForm from './InvestmentsForm.jsx';
 import jsPDF from 'jspdf'; 
@@ -7,57 +7,54 @@ import jsPDF from 'jspdf';
 function Investments() {
   const [investments, setInvestments] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [db, setDb] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const forceRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
-    const setupDatabase = async () => {
+    const initDB = async () => {
       try {
-        const db = await initializeDatabase();
-
-        const investmentsData = await fetchData(db, 'investments');
-        if (investmentsData.length === 0) {
-          await addData(db, 'investments', {
-            financialOrganization: 'ABC Financials',
-            financialInstitution: 'ABC Bank',
-            branchAddress: '123 Main St, Springfield',
-            typeOfInvestment: 'Fixed Deposit',
-            investmentNumber: 'FD123456',
-            investmentHolder: 'John Doe',
-            nominee: 'Jane Doe',
-            nomineeGuardian: 'N/A',
-            investmentAmount: '$10,000',
-            rateOfInvestment: '5%',
-            investmentDate: '2025-01-01',
-            investmentDuration: '5 years',
-            maturityDate: '2030-01-01',
-            maturityAmount: '$12,762',
-          });
-
-          await addData(db, 'investments', {
-            financialOrganization: 'XYZ Financials',
-            financialInstitution: 'XYZ Bank',
-            branchAddress: '456 Elm St, Metropolis',
-            typeOfInvestment: 'Mutual Fund',
-            investmentNumber: 'MF789012',
-            investmentHolder: 'Mary Smith',
-            nominee: 'John Smith',
-            nomineeGuardian: 'N/A',
-            investmentAmount: '$20,000',
-            rateOfInvestment: '8%',
-            investmentDate: '2024-06-15',
-            investmentDuration: '10 years',
-            maturityDate: '2034-06-15',
-            maturityAmount: '$43,178',
-          });
-        }
-
-        setInvestments(await fetchData(db, 'investments'));
+        const database = await initializeDatabase();
+        setDb(database);
       } catch (error) {
-        console.error('Error setting up the database:', error);
+        console.error('Error initializing database:', error);
       }
     };
 
-    setupDatabase();
+    initDB();
+    
+    return () => {
+      if (db) db.close();
+    };
   }, []);
+
+  useEffect(() => {
+    const loadInvestments = async () => {
+      if (!db) return;
+      
+      try {
+        console.log('Attempting to fetch investments data...');
+        const investmentsData = await fetchData(db, 'investments');
+        console.log('Raw investments data received:', investmentsData);
+        
+        if (!Array.isArray(investmentsData)) {
+          console.error('Received non-array data:', typeof investmentsData, investmentsData);
+          setInvestments([]);
+          return;
+        }
+        
+        console.log('Setting investments state with data length:', investmentsData.length);
+        setInvestments(investmentsData);
+      } catch (error) {
+        console.error('Error fetching investments:', error);
+      }
+    };
+
+    loadInvestments();
+  }, [db, showForm, refreshTrigger]);
 
   const downloadCSV = () => {
     const headers = [
@@ -70,7 +67,7 @@ function Investments() {
       'Nominee',
       'Nominee Guardian',
       'Investment Amount',
-      'Rate of Investment',
+      'Rate of Interest', 
       'Investment Date',
       'Investment Duration',
       'Maturity Date',
@@ -80,7 +77,7 @@ function Investments() {
     const rows = investments.map((investment) =>
       [
         investment.financialOrganization,
-        investment.financialInstitution,
+        investment.nameOfFinancialInstitution, 
         investment.branchAddress,
         investment.typeOfInvestment,
         investment.investmentNumber,
@@ -88,7 +85,7 @@ function Investments() {
         investment.nominee,
         investment.nomineeGuardian,
         investment.investmentAmount,
-        investment.rateOfInvestment,
+        investment.rateOfInterest, 
         investment.investmentDate,
         investment.investmentDuration,
         investment.maturityDate,
@@ -110,24 +107,17 @@ function Investments() {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    let y = 10; // Vertical position in the PDF
+    let y = 10; 
 
     doc.setFontSize(12);
     doc.text('Investments Table', 10, y);
     y += 10;
 
-    // table headers
-    doc.text(
-      'Financial Organization | Name of Financial Institution | Branch Address | Type of Investment | Investment Number | Investment Holder | Nominee | Nominee Guardian | Investment Amount | Rate of Investment | Investment Date | Investment Duration | Maturity Date | Maturity Amount',
-      10,
-      y,
-      { maxWidth: 190 }
-    );
+    doc.text('Investment Details', 10, y);
     y += 10;
 
-    // table rows
     investments.forEach((investment, index) => {
-      const data = `${index + 1}. ${investment.financialOrganization}, ${investment.financialInstitution}, ${investment.branchAddress}, ${investment.typeOfInvestment}, ${investment.investmentNumber}, ${investment.investmentHolder}, ${investment.nominee}, ${investment.nomineeGuardian}, ${investment.investmentAmount}, ${investment.rateOfInvestment}, ${investment.investmentDate}, ${investment.investmentDuration}, ${investment.maturityDate}, ${investment.maturityAmount}`;
+      const data = `${index + 1}. ${investment.financialOrganization}, ${investment.nameOfFinancialInstitution}, ${investment.typeOfInvestment}, ${investment.investmentAmount}, ${investment.maturityDate}`;
       doc.text(data, 10, y, { maxWidth: 190 });
       y += 10;
 
@@ -154,7 +144,7 @@ function Investments() {
             <th>Nominee</th>
             <th>Nominee Guardian</th>
             <th>Investment Amount</th>
-            <th>Rate of Investment</th>
+            <th>Rate of Interest</th>
             <th>Investment Date</th>
             <th>Investment Duration</th>
             <th>Maturity Date</th>
@@ -162,24 +152,30 @@ function Investments() {
           </tr>
         </thead>
         <tbody>
-          {investments.map((investment, index) => (
-            <tr key={index}>
-              <td>{investment.financialOrganization}</td>
-              <td>{investment.financialInstitution}</td>
-              <td>{investment.branchAddress}</td>
-              <td>{investment.typeOfInvestment}</td>
-              <td>{investment.investmentNumber}</td>
-              <td>{investment.investmentHolder}</td>
-              <td>{investment.nominee}</td>
-              <td>{investment.nomineeGuardian}</td>
-              <td>{investment.investmentAmount}</td>
-              <td>{investment.rateOfInvestment}</td>
-              <td>{investment.investmentDate}</td>
-              <td>{investment.investmentDuration}</td>
-              <td>{investment.maturityDate}</td>
-              <td>{investment.maturityAmount}</td>
+          {Array.isArray(investments) && investments.length > 0 ? (
+            investments.map((investment, index) => (
+              <tr key={index}>
+                <td>{investment.financialOrganization}</td>
+                <td>{investment.nameOfFinancialInstitution}</td>
+                <td>{investment.branchAddress}</td>
+                <td>{investment.typeOfInvestment}</td>
+                <td>{investment.investmentNumber}</td>
+                <td>{investment.investmentHolder}</td>
+                <td>{investment.nominee}</td>
+                <td>{investment.nomineeGuardian}</td>
+                <td>{investment.investmentAmount}</td>
+                <td>{investment.rateOfInterest}</td>
+                <td>{investment.investmentDate}</td>
+                <td>{investment.investmentDuration}</td>
+                <td>{investment.maturityDate}</td>
+                <td>{investment.maturityAmount}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="14">No investments found.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
       <div className="buttonCluster">
@@ -188,7 +184,15 @@ function Investments() {
         <button onClick={downloadPDF}>Download as PDF</button>
       </div>
 
-      {showForm && <InvestmentsForm closeForm={() => setShowForm(false)} />}
+      {showForm && (
+        <InvestmentsForm 
+          db={db} 
+          closeForm={() => {
+            setShowForm(false);
+            forceRefresh();
+          }} 
+        />
+      )}
     </div>
   );
 }

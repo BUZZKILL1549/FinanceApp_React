@@ -2,29 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { initializeDatabase, addData, fetchData } from '../../../server.js';
 import './Insurance.css';
 import InsuranceForm from './InsuranceForm.jsx';
-import jsPDF from 'jspdf'; 
+import jsPDF from 'jspdf';
 
 function Insurance() {
   const [insurance, setInsurance] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const setupDatabase = async () => {
+      setLoading(true);
       try {
         const db = await initializeDatabase();
 
         const insuranceData = await fetchData(db, 'insurance');
         if (insuranceData.length === 0) {
           await addData(db, 'insurance', {
-            provider: 'ABC Insurance',
+            insuranceProvider: 'ABC Insurance',
             policyNumber: '12345',
             policyName: 'Life Secure',
             policyHolder: 'John Doe',
             lifeInsured: 'John Doe',
             sumAssured: '$100,000',
             nominee: 'Jane Doe',
-            paymentTerm: '10 years',
-            paymentFrequency: 'Annual',
+            policyPaymentTerm: '10 years',
+            premiumPaymentFrequency: 'Annual',
             lastPremiumPaid: '2025-01-01',
             nextPremiumDue: '2026-01-01',
             maturityDate: '2035-01-01',
@@ -32,15 +34,15 @@ function Insurance() {
           });
 
           await addData(db, 'insurance', {
-            provider: 'XYZ Insurance',
+            insuranceProvider: 'XYZ Insurance',
             policyNumber: '67890',
             policyName: 'Wealth Builder',
             policyHolder: 'Mary Smith',
             lifeInsured: 'Mary Smith',
             sumAssured: '$200,000',
             nominee: 'John Smith',
-            paymentTerm: '15 years',
-            paymentFrequency: 'Semi-Annual',
+            policyPaymentTerm: '15 years',
+            premiumPaymentFrequency: 'Semi-Annual',
             lastPremiumPaid: '2024-12-01',
             nextPremiumDue: '2025-06-01',
             maturityDate: '2040-12-01',
@@ -52,10 +54,36 @@ function Insurance() {
       } catch (error) {
         console.error('Error setting up the database:', error);
       }
+      setLoading(false);
     };
 
     setupDatabase();
   }, []);
+
+  const addInsurance = async (newPolicy) => {
+    console.log('Adding insurance data:', newPolicy);
+
+    try {
+      const db = await initializeDatabase();
+      const tx = db.transaction('insurance', 'readwrite');
+      const store = tx.objectStore('insurance');
+      const request = store.add(newPolicy);
+
+      request.onsuccess = async () => {
+        console.log('Data added successfully to IndexedDB:', newPolicy);
+
+        const updatedData = await fetchData(db, 'insurance'); 
+        console.log('Updated data:', updatedData);
+        setInsurance(updatedData); 
+      };
+
+      request.onerror = (event) => {
+        console.error('Error adding data to IndexedDB:', event.target.error);
+      };
+    } catch (error) {
+      console.error('Error in addInsurance:', error);
+    }
+  };
 
   const downloadCSV = () => {
     const headers = [
@@ -76,15 +104,15 @@ function Insurance() {
 
     const rows = insurance.map((policy) =>
       [
-        policy.provider,
+        policy.insuranceProvider,
         policy.policyNumber,
         policy.policyName,
         policy.policyHolder,
         policy.lifeInsured,
         policy.sumAssured,
         policy.nominee,
-        policy.paymentTerm,
-        policy.paymentFrequency,
+        policy.policyPaymentTerm,
+        policy.premiumPaymentFrequency,
         policy.lastPremiumPaid,
         policy.nextPremiumDue,
         policy.maturityDate,
@@ -106,13 +134,12 @@ function Insurance() {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    let y = 10; // Vertical position in the PDF
+    let y = 10; 
 
     doc.setFontSize(12);
     doc.text('Insurance Table', 10, y);
     y += 10;
 
-    // table headers
     doc.text(
       'Insurance Provider | Policy Number | Policy Name | Policy Holder | Life Insured | Sum Assured | Nominee | Policy Payment Term | Premium Payment Frequency | Last Premium Paid | Next Premium Due | Maturity Date | Maturity Amount',
       10,
@@ -121,9 +148,8 @@ function Insurance() {
     );
     y += 10;
 
-    // table rows
     insurance.forEach((policy, index) => {
-      const data = `${index + 1}. ${policy.provider}, ${policy.policyNumber}, ${policy.policyName}, ${policy.policyHolder}, ${policy.lifeInsured}, ${policy.sumAssured}, ${policy.nominee}, ${policy.paymentTerm}, ${policy.paymentFrequency}, ${policy.lastPremiumPaid}, ${policy.nextPremiumDue}, ${policy.maturityDate}, ${policy.maturityAmount}`;
+      const data = `${index + 1}. ${policy.insuranceProvider}, ${policy.policyNumber}, ${policy.policyName}, ${policy.policyHolder}, ${policy.lifeInsured}, ${policy.sumAssured}, ${policy.nominee}, ${policy.policyPaymentTerm}, ${policy.premiumPaymentFrequency}, ${policy.lastPremiumPaid}, ${policy.nextPremiumDue}, ${policy.maturityDate}, ${policy.maturityAmount}`;
       doc.text(data, 10, y, { maxWidth: 190 });
       y += 10;
 
@@ -135,6 +161,10 @@ function Insurance() {
 
     doc.save('insurance.pdf');
   };
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return (
     <div>
@@ -157,17 +187,17 @@ function Insurance() {
           </tr>
         </thead>
         <tbody>
-          {insurance.map((policy, index) => (
-            <tr key={index}>
-              <td>{policy.provider}</td>
+          {insurance.map((policy) => (
+            <tr key={policy.policyNumber}>
+              <td>{policy.insuranceProvider}</td>
               <td>{policy.policyNumber}</td>
               <td>{policy.policyName}</td>
               <td>{policy.policyHolder}</td>
               <td>{policy.lifeInsured}</td>
               <td>{policy.sumAssured}</td>
               <td>{policy.nominee}</td>
-              <td>{policy.paymentTerm}</td>
-              <td>{policy.paymentFrequency}</td>
+              <td>{policy.policyPaymentTerm}</td>
+              <td>{policy.premiumPaymentFrequency}</td>
               <td>{policy.lastPremiumPaid}</td>
               <td>{policy.nextPremiumDue}</td>
               <td>{policy.maturityDate}</td>
@@ -182,7 +212,12 @@ function Insurance() {
         <button onClick={downloadPDF}>Download as PDF</button>
       </div>
 
-      {showForm && <InsuranceForm closeForm={() => setShowForm(false)} />}
+      {showForm && (
+        <InsuranceForm
+          closeForm={() => setShowForm(false)}
+          addInsurance={addInsurance}
+        />
+      )}
     </div>
   );
 }

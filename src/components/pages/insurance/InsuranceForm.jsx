@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './InsuranceForm.css';
 
-function InsuranceForm({ closeForm }) {
+function InsuranceForm({ closeForm, addInsurance }) {
   const [formData, setFormData] = useState({
     insuranceProvider: '',
     policyNumber: '',
@@ -18,17 +18,15 @@ function InsuranceForm({ closeForm }) {
     maturityAmount: '',
   });
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    closeForm(); // Close the popup after submission
+    addInsurance(formData);
+    closeForm(); 
   };
 
   return (
@@ -89,7 +87,7 @@ function InsuranceForm({ closeForm }) {
           <div>
             <label>Sum Assured: </label>
             <input
-              type="text"
+              type="number"
               name="sumAssured"
               value={formData.sumAssured}
               onChange={handleChange}
@@ -109,10 +107,11 @@ function InsuranceForm({ closeForm }) {
           <div>
             <label>Policy Payment Term: </label>
             <input 
-              type="text"
+              type="number"
               name="policyPaymentTerm"
               value={formData.policyPaymentTerm}
               onChange={handleChange}
+              placeholder="2 years"
               required
             />
           </div>
@@ -123,13 +122,14 @@ function InsuranceForm({ closeForm }) {
               name="premiumPaymentFrequency"
               value={formData.premiumPaymentFrequency}
               onChange={handleChange}
+              placeholder="1 year"
               required 
             />
           </div>
           <div>
             <label>Last Premium Paid: </label>
             <input
-              type="text"
+              type="date"
               name="lastPremiumPaid"
               value={formData.lastPremiumPaid}
               onChange={handleChange}
@@ -139,7 +139,7 @@ function InsuranceForm({ closeForm }) {
           <div>
             <label>Next Premium Due: </label>
             <input 
-              type="text"
+              type="date"
               name="nextPremiumDue"
               value={formData.nextPremiumDue}
               onChange={handleChange}
@@ -149,7 +149,7 @@ function InsuranceForm({ closeForm }) {
           <div>
             <label>Maturity Date: </label>
             <input
-              type="text"
+              type="date"
               name="maturityDate"
               value={formData.maturityDate}
               onChange={handleChange}
@@ -159,7 +159,7 @@ function InsuranceForm({ closeForm }) {
           <div>
             <label>Maturity Amount: </label>
             <input
-              type="text"
+              type="number"
               name="maturityAmount"
               value={formData.maturityAmount}
               onChange={handleChange}
@@ -167,7 +167,7 @@ function InsuranceForm({ closeForm }) {
             />
           </div>
           <div className="popup-buttons">
-            <button type="submit">Add</button>
+            <button type="submit" onClick={handleSubmit}>Add</button>
             <button type="button" onClick={closeForm}>Cancel</button>
           </div>
         </form>

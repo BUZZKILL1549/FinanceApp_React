@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { addData } from '../../../server.js'; 
 import './Investments.css';
 
-function InvestmentsForm({ closeForm }) {
+function InvestmentsForm({ db, closeForm }) {
   const [formData, setFormData] = useState({
     financialOrganization: '',
     nameOfFinancialInstitution: '',
@@ -24,11 +25,22 @@ function InvestmentsForm({ closeForm }) {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted: ', formData);
-    closeForm();
-  };
+    
+    if (!db) {
+      console.error('Database not initialized');
+      return;
+    }
+    
+    try {
+      await addData(db, 'investments', formData);
+      console.log('Investment data saved successfully');
+      closeForm(); 
+    } catch (error) {
+      console.error('Error saving investment data:', error);
+    }
+  }; 
 
   return (
     <div className="popup-overlay">
@@ -118,7 +130,7 @@ function InvestmentsForm({ closeForm }) {
           <div>
             <label>Investment Amount: </label>
             <input
-              type="text"
+              type="number"
               name="investmentAmount"
               value={formData.investmentAmount}
               onChange={handleChange}
@@ -126,9 +138,9 @@ function InvestmentsForm({ closeForm }) {
             />
           </div>
           <div>
-            <label>Rate of Interest: </label>
+            <label>Rate of Interest (in %): </label>
             <input
-              type="text"
+              type="number"
               name="rateOfInterest"
               value={formData.rateOfInterest}
               onChange={handleChange}
@@ -138,7 +150,7 @@ function InvestmentsForm({ closeForm }) {
           <div>
             <label>Investment Date: </label>
             <input
-              type="text"
+              type="date"
               name="investmentDate"
               value={formData.investmentDate}
               onChange={handleChange}
@@ -146,7 +158,7 @@ function InvestmentsForm({ closeForm }) {
             />
           </div>
           <div>
-            <label>Investment Duration: </label>
+            <label>Investment Duration (in months): </label>
             <input
               type="text"
               name="investmentDuration"
@@ -158,7 +170,7 @@ function InvestmentsForm({ closeForm }) {
           <div>
             <label>Maturity Date: </label>
             <input
-              type="text"
+              type="date"
               name="maturityDate"
               value={formData.maturityDate}
               onChange={handleChange}
@@ -168,9 +180,9 @@ function InvestmentsForm({ closeForm }) {
           <div>
             <label>Maturity Amount: </label>
             <input
-              type="text"
+              type="number"
               name="maturityAmount"
-              values={formData.maturityAmount}
+              value={formData.maturityAmount}
               onChange={handleChange}
               required
             />
